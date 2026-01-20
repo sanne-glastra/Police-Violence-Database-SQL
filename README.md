@@ -1,40 +1,42 @@
-# Police Violence Database: LA & Orange County
+# Incident Reporting Database System (SQL)
 
 ![Status](https://img.shields.io/badge/Status-Completed-success)
 ![Language](https://img.shields.io/badge/Language-SQL-blue)
-![Focus](https://img.shields.io/badge/Focus-Data%20Engineering-red)
+![Focus](https://img.shields.io/badge/Focus-Data%20Engineering%20%7C%20Database%20Design-blue)
 
-## 📌 Project Overview
-This repository contains the schema design and analytical queries for a relational database documenting police violence incidents in **Los Angeles (LA)** and **Orange County (OC)**.
+## 📌 Technical Overview
+This repository contains the schema design, data modeling, and analytical queries for a relational database built to structure complex incident reporting data.
 
-The project was designed to enable data-driven inquiries into law enforcement accountability. It structures unstructured incident reports into a normalized relational format to answer critical questions regarding:
-1.  **Racial Disparities:** Comparing force types used against Black victims vs. other demographics.
-2.  **Accountability:** Correlating "Severe/Fatal" injury outcomes with officer disciplinary rates.
-3.  **Geospatial Trends:** Identifying high-frequency incident zones across urban (LA) vs. suburban (OC) settings.
+The project demonstrates **end-to-end data engineering capabilities**, transforming unstructured incident logs from Los Angeles and Orange County into a normalized relational architecture. The system is optimized for multi-dimensional analysis, handling many-to-one relationships between incidents, personnel, and subject demographics.
 
-## 📂 Database Schema
-The database utilizes a **Relational Schema** centered on a primary fact table (`Incidents`) linked to dimensional tables for victims, officers, and force types.
+## 🛠️ Engineering Capabilities
+* **Relational Schema Design:** Designed a **normalized Star-like Schema** to reduce data redundancy and ensure referential integrity between Fact tables (Incidents) and Dimension tables (Officers, Victims, Force Types).
+* **Advanced SQL Querying:**
+    * **Complex Joins:** Implemented multi-table joins to reconstruct event narratives from fragmented dimensional data.
+    * **Subqueries & Aggregations:** Utilized nested subqueries to calculate baseline averages (e.g., county-wide incident rates) and compare them against specific subset metrics.
+    * **Conditional Logic:** Developed queries with complex `WHERE` and `HAVING` clauses to filter for specific multi-variable edge cases (e.g., specific injury outcomes linked to lack of procedural action).
+* **Data Integrity:** Enforced database constraints using Primary Keys and Foreign Keys to prevent orphan records and ensure data quality.
 
-* **`Incidents` (Parent Table):** The core fact table containing temporal and geospatial data (Date, City, County, Address).
-* **`Victims` (Child Table):** Demographic data (Race/Ethnicity) and health outcomes (Injury Status).
-* **`Officers` (Child Table):** Law enforcement data, including badge numbers and disciplinary actions taken (Y/N).
-* **`Force_Types` (Lookup Table):** Standardized dictionary of force categories (e.g., Taser, Firearm, Control Hold).
+## 📂 Database Architecture
+The database models the following entity relationships:
 
-### Entity Relationship Diagram
-You can view the full schema design here: [View EER Diagram](diagrams/entity_relationship_diagram.pdf)
+* **`Incidents` (Fact Table):** The central node containing temporal and geospatial data (Date, City, Coordinates).
+* **`Victims` (Dimension):** Stores demographic and health outcome data, linked via Foreign Key.
+* **`Officers` (Dimension):** Stores personnel metadata and procedural outcomes (Disciplinary Action), allowing for one-to-many analysis (multiple officers per incident).
+* **`Force_Types` (Lookup):** A standardized dictionary table to normalize force categorization.
 
-## 💻 SQL Skills Demonstrated
-The `src/police_violence_schema.sql` script demonstrates advanced querying and data manipulation capabilities:
+### Schema Diagram
+[View Entity Relationship Diagram (EER)](diagrams/entity_relationship_diagram.pdf)
 
-* **Complex Joins:** Linking `Victims`, `Officers`, and `Force_Types` to reconstruct full incident narratives.
-* **Conditional Logic:** Identifying "Accountability Gaps" (e.g., queries isolating incidents where *Injury = Fatal* AND *Disciplinary Action = None*).
-* **Aggregations & Subqueries:**
-    * Calculating incident counts by specific cities.
-    * Comparing specific demographic incident rates against the **average across all races**.
-* **Data Integrity:** Implementation of Foreign Keys to enforce relationships between the Incident parent table and Officer/Victim child tables.
+## 💻 Sample Query Logic
+The `src/police_violence_schema.sql` script includes queries that demonstrate:
 
-## 🔍 Sample Analysis Questions
-This database was built to answer queries such as:
-* *"What is the most common force type used against Black and African American victims?"*
-* *"Among victims with severe or fatal injuries, how many officers received NO disciplinary action?"*
-* *"Which cities in Orange County have the highest density of police violence incidents?"*
+1.  **Demographic Aggregation:** Grouping data by multiple dimensions (Race/Ethnicity + Injury Status) to derive frequency distributions.
+2.  **Comparative Analytics:** Comparing the *average* number of incidents across all cohorts vs. the *actual* count for specific high-frequency groups.
+3.  **Cross-Table filtering:** Isolating records that meet criteria across joined tables (e.g., Incidents in 'City X' AND Officer Disciplinary Status = 'NULL' AND Victim Status = 'Severe').
+
+## 🚀 Usage
+This project uses **PostgreSQL** syntax.
+1.  **Schema Build:** Run the `CREATE TABLE` statements in `src/` to initialize the architecture.
+2.  **Data Loading:** Use the provided `COPY` commands to seed the `Force_Types` lookup table from CSV.
+3.  **Analysis:** Execute the stored queries to generate report metrics.
