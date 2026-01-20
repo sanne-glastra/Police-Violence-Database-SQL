@@ -2,7 +2,7 @@
 
 ![Status](https://img.shields.io/badge/Status-Completed-success)
 ![Language](https://img.shields.io/badge/Language-SQL-blue)
-![Focus](https://img.shields.io/badge/Focus-Social%20Justice%20%7C%20Data%20Engineering-red)
+![Focus](https://img.shields.io/badge/Focus-Data%20Engineering-red)
 
 ## 📌 Project Overview
 This repository contains the schema design and analytical queries for a relational database documenting police violence incidents in **Los Angeles (LA)** and **Orange County (OC)**.
