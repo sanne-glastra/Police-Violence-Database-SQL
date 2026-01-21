@@ -46,12 +46,22 @@ The project utilizes advanced SQL features to derive insights:
 
 ## Key Analysis Examples
 
-### Investigating Accountability
-I used `CASE WHEN` logic inside aggregation functions to "pivot" the data, transforming rows (dates) into columns (years) for side-by-side temporal analysis.
+## Key Analysis Examples
+
+### Statistical Comparisons (Window Functions)
+I utilized Window Functions to calculate a "moving baseline" (the average incidents across all races) and compared specific demographic groups against it dynamically.
 ```sql
--- Q4: Pivot incident counts by year to compare 2023 vs 2024 per county
-SELECT county, 
-    COUNT(CASE WHEN YEAR(date) = 2023 THEN incident_id END) AS incidents_2023,
-    COUNT(CASE WHEN YEAR(date) = 2024 THEN incident_id END) AS incidents_2024
-FROM incidents
-GROUP BY county;
+-- Q8: Compare specific race count to the average count across all races
+WITH race_avg AS (
+    SELECT race_ethnicity, num_incidents_by_race, 
+    AVG(num_incidents_by_race) OVER() AS avg_incidents
+    FROM (SELECT race_ethnicity, COUNT(incident_id) OVER(PARTITION BY race_ethnicity) 
+          AS num_incidents_by_race FROM victims) AS derived
+)
+SELECT *,
+    CASE 
+        WHEN num_incidents_by_race < avg_incidents THEN 'Below Average'
+        WHEN num_incidents_by_race > avg_incidents THEN 'Above Average'
+        ELSE 'Equal to average'
+    END AS incident_category
+FROM race_avg;
