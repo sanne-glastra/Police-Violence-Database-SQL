@@ -5,39 +5,27 @@
 ![Focus](https://img.shields.io/badge/Focus-Data%20Modeling-orange)
 
 ## Project Overview
-This project establishes a relational database to structure and analyze incident reporting data from Los Angeles and Orange County. The goal was to take raw, unstructured incident logs and convert them into a clean, normalized schema that supports complex querying.
+This project establishes a relational database to structure and analyze incident reporting data from Los Angeles and Orange County. The goal was to take raw, unstructured incident logs and convert them into a clean, structured format that supports complex querying.
 
-The database handles one-to-many relationships (e.g., multiple officers per incident) and enforces data integrity through strict primary and foreign key constraints.
+The database organizes data into logical tables (separating "Events" from "People") and enforces strict connections between them to ensure accuracy.
 
-## Technical Implementation
+## Skills Demonstrated
 
-### 1. Database Schema
-I designed a **Star-Schema** architecture to separate the central event data from the descriptive attributes. This reduces redundancy and improves query performance.
+### 1. Relational Database Design
+* **Structuring Data:** I designed a **Normalized Schema** that separates data into four distinct tables (`Incidents`, `Victims`, `Officers`, `Force_Types`). This reduces redundancy and ensures that updates to one record (like an officer's details) reflect everywhere automatically.
+* **Data Integrity:** Implemented **Primary Keys** and **Foreign Keys** to strictly enforce relationships. This prevents "orphan" records (e.g., an incident appearing without a valid location or date).
 
-* **`Incidents` (Fact Table):** Central table containing the "when" and "where" (Date, Location, City).
-* **`Victims` & `Officers` (Dimension Tables):** Stores demographic and personnel data. Linked to Incidents via Foreign Keys.
-* **`Force_Types` (Lookup Table):** A standardized dictionary for force categories (e.g., Taser, Control Hold) to ensure data consistency.
+### 2. Advanced SQL Querying
+The `src/police_violence_schema.sql` script demonstrates the ability to solve complex data questions:
 
-### 2. SQL Logic
-The `src/police_violence_schema.sql` script handles the full ETL (Extract, Transform, Load) process:
+* **Complex Joins:** I used multi-table joins to reconnect the four separated tables, reconstructing the full narrative of an event (Who, What, Where) for analysis.
+* **Subqueries:** I wrote nested queries to calculate baseline metrics (e.g., the average number of incidents across *all* groups) to compare against specific demographic subsets.
+* **Aggregations & Grouping:** Used `GROUP BY` to summarize data by multiple dimensions (e.g., grouping by City AND Injury Status) to find high-density clusters.
+* **Conditional Filtering:** Applied `HAVING` clauses to filter these grouped results based on specific thresholds (e.g., only showing cities with >10 severe incidents).
 
-* **Table Creation:** Defines tables with specific data types and constraints to prevent bad data entry (e.g., orphan records).
-* **Complex Joins:** Connects four distinct tables to reconstruct complete incident narratives from fragmented data.
-* **Analytical Queries:**
-    * **Subqueries:** Calculates baseline averages (e.g., average incidents across all demographics) to compare against specific groups.
-    * **Aggregations:** Groups data by multiple dimensions (City + Injury Status) to find high-density clusters.
-    * **Filtering:** Uses `HAVING` clauses to filter grouped data based on aggregate thresholds.
+### 3. Data Dictionary
 
-[Image of Database Schema Diagram]
 
-## How to Run
-This project is built for **PostgreSQL**.
-
-1.  **Build the Schema:** Run the `CREATE TABLE` commands in `src/police_violence_schema.sql`.
-2.  **Load Data:** Import the `force_lookup_data.csv` to populate the lookup table.
-3.  **Run Queries:** Execute the analysis scripts at the bottom of the SQL file to generate reports.
-## 🚀 Usage
-This project uses **PostgreSQL** syntax.
-1.  **Schema Build:** Run the `CREATE TABLE` statements in `src/` to initialize the architecture.
-2.  **Data Loading:** Use the provided `COPY` commands to seed the `Force_Types` lookup table from CSV.
-3.  **Analysis:** Execute the stored queries to generate report metrics.
+* **`Incidents` (Main Table):** Stores the core event data (Date, Location, City).
+* **`Victims` & `Officers`:** Stores demographic and personnel details, linked to the main table via ID numbers.
+* **`Force_Types`:** A lookup table that standardizes the categories of force used (e.g., "Taser," "Firearm"), ensuring data consistency across thousands of records.
