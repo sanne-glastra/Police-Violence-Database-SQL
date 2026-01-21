@@ -49,7 +49,9 @@ The project utilizes advanced SQL features to derive insights:
 ### Investigating Accountability
 I utilized conditional logic to identify "Accountability Gaps"—specifically, incidents where severe harm occurred but no discipline followed.
 ```sql
--- Q10: Among victims where injury status is severe or fatal, how many officers did NOT receive disciplinary action?
-SELECT COUNT(officer_id) AS officer_count
-FROM victims_injury_status
-WHERE disciplinary_action = 'No';
+-- Q4: Pivot incident counts by year to compare 2023 vs 2024 per county
+SELECT county, 
+    COUNT(CASE WHEN YEAR(date) = 2023 THEN incident_id END) AS incidents_2023,
+    COUNT(CASE WHEN YEAR(date) = 2024 THEN incident_id END) AS incidents_2024
+FROM incidents
+GROUP BY county;
