@@ -2,30 +2,45 @@
 
 ![Language](https://img.shields.io/badge/Language-SQL-blue)
 ![Database](https://img.shields.io/badge/Database-PostgreSQL-blue)
-![Focus](https://img.shields.io/badge/Focus-Data%20Modeling-orange)
+![Focus](https://img.shields.io/badge/Focus-Relational%20Design-orange)
 
 ## Project Overview
-This project establishes a relational database to structure and analyze incident reporting data from Los Angeles and Orange County. The goal was to take raw, unstructured incident logs and convert them into a clean, structured format that supports complex querying.
+This project establishes a relational database to structure and analyze incident reporting data from Los Angeles and Orange County. The goal was to transform flat, unstructured logs into a **connected, relational system** that reflects the real-world complexity of these events.
 
-The database organizes data into logical tables (separating "Events" from "People") and enforces strict connections between them to ensure accuracy.
+By moving away from a single "flat file" spreadsheet, this design allows for efficient querying of complex scenarios, such as incidents involving multiple officers or diverse force types.
 
-## Skills Demonstrated
-
-### 1. Relational Database Design
-* **Structuring Data:** I designed a **Normalized Schema** that separates data into four distinct tables (`Incidents`, `Victims`, `Officers`, `Force_Types`). This reduces redundancy and ensures that updates to one record (like an officer's details) reflect everywhere automatically.
-* **Data Integrity:** Implemented **Primary Keys** and **Foreign Keys** to strictly enforce relationships. This prevents "orphan" records (e.g., an incident appearing without a valid location or date).
-
-### 2. Advanced SQL Querying
-The `src/police_violence_schema.sql` script demonstrates the ability to solve complex data questions:
-
-* **Complex Joins:** I used multi-table joins to reconnect the four separated tables, reconstructing the full narrative of an event (Who, What, Where) for analysis.
-* **Subqueries:** I wrote nested queries to calculate baseline metrics (e.g., the average number of incidents across *all* groups) to compare against specific demographic subsets.
-* **Aggregations & Grouping:** Used `GROUP BY` to summarize data by multiple dimensions (e.g., grouping by City AND Injury Status) to find high-density clusters.
-* **Conditional Filtering:** Applied `HAVING` clauses to filter these grouped results based on specific thresholds (e.g., only showing cities with >10 severe incidents).
-
-### 3. Data Dictionary
+## Database Architecture & Relationships
+The core strength of this project is the **Relational Schema**, which organizes data into four logical entities connected by strict relationships.
 
 
-* **`Incidents` (Main Table):** Stores the core event data (Date, Location, City).
-* **`Victims` & `Officers`:** Stores demographic and personnel details, linked to the main table via ID numbers.
-* **`Force_Types`:** A lookup table that standardizes the categories of force used (e.g., "Taser," "Firearm"), ensuring data consistency across thousands of records.
+
+### 1. The Parent-Child Structure
+* **`Incidents` (Parent Table):** This is the central anchor of the database. It stores the unique "Event" data (Date, Location, City).
+* **`Officers` & `Victims` (Child Tables):** These contain the detailed personnel data. They are linked back to the `Incidents` table via the `incident_id` Foreign Key.
+
+### 2. One-to-Many Relationships
+I designed the schema to handle **One-to-Many** relationships rather than simple One-to-One matches:
+* **One Incident $\rightarrow$ Many Officers:** A single incident often involves multiple responding officers. By separating these into two tables, the database can record unique disciplinary outcomes for *each* officer involved in the same event without duplicating the incident data.
+* **One Incident $\rightarrow$ Many Victims:** Similarly, this structure allows multiple subjects to be associated with a single event ID, preserving the integrity of the event data.
+
+### 3. Lookup Tables (Standardization)
+* **`Force_Types`:** To prevent data inconsistency (e.g., "Taser" vs. "Tased"), I implemented a Lookup Table linked via `force_id`. This ensures every incident references a standardized definition of force.
+
+## Technical Skills Demonstrated
+
+### Advanced SQL Querying
+The `src/police_violence_schema.sql` script demonstrates the ability to leverage these relationships for analysis:
+
+* **Multi-Table Joins:** utilized `INNER JOIN` and `LEFT JOIN` commands to reconnect the `Incidents`, `Victims`, and `Officers` tables. This allows for queries that span across relationships (e.g., *"Find the City (from Incidents) where the Officer (from Officers) had no disciplinary action"*).
+* **Subqueries & Aggregation:** Wrote nested queries to calculate baseline averages across the entire dataset, then compared specific demographic subsets against those baselines.
+* **Complex Filtering:** Applied `GROUP BY` and `HAVING` clauses to identify high-density clusters (e.g., cities with above-average incident rates).
+
+### Data Integrity
+* **Constraints:** Implemented **Primary Keys** to ensure every record is unique and **Foreign Keys** to enforce referential integrity (preventing an officer from being added to a non-existent incident).
+
+## How to Run
+This project is built for **PostgreSQL**.
+
+1.  **Build the Schema:** Run the `CREATE TABLE` commands in `src/police_violence_schema.sql` to set up the relationships.
+2.  **Load Data:** Import the `force_lookup_data.csv` to populate the lookup table.
+3.  **Run Analysis:** Execute the query block at the bottom of the SQL file to generate reports.
