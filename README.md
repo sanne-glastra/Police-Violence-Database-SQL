@@ -5,42 +5,51 @@
 ![Focus](https://img.shields.io/badge/Focus-Relational%20Design-orange)
 
 ## Project Overview
-This project establishes a relational database to structure and analyze incident reporting data from Los Angeles and Orange County. The goal was to transform flat, unstructured logs into a **connected, relational system** that reflects the real-world complexity of these events.
+This project establishes a relational database to structure and analyze police violence incidents in **Los Angeles County (LA)** and **Orange County (OC)**.
 
-By moving away from a single "flat file" spreadsheet, this design allows for efficient querying of complex scenarios, such as incidents involving multiple officers or diverse force types.
+The goal was to transform unstructured incident logs into a **connected, relational system** capable of supporting rigorous inquiry. By moving away from flat files, this design enables complex analysis of accountability gaps, such as correlating officer disciplinary rates with the severity of injuries sustained by victims.
 
-## Database Architecture & Relationships
-The core strength of this project is the **Relational Schema**, which organizes data into four logical entities connected by strict relationships.
+## Research Aims
+The database was engineered to support five critical research aims, requiring a schema that could handle complex demographic and procedural data:
+1.  **Force Classification:** Documenting and standardizing the different types of force used (e.g., Taser vs. Firearm).
+2.  **Demographic Analysis:** Examining the racial demographics of victims to identify disparities, specifically regarding the disproportionate targeting of Black Americans.
+3.  **Accountability:** Tracking disciplinary action rates for officers involved in severe incidents.
+4.  **Geospatial Trends:** Comparing incident density in urban settings (LA) versus suburban profiles (OC).
+5.  **Correlational Analysis:** Investigating if victim race influences the *type* of force deployed.
+
+## Database Architecture
+The schema organizes data into four logical entities connected by strict relationships:
+* **`Incidents` (Parent Table):** The central anchor storing unique event data (Date, Location, City).
+* **`Officers` (Child Table):** Linked via `incident_id`. Tracks personnel actions and disciplinary outcomes.
+* **`Victims` (Child Table):** Linked via `incident_id`. Tracks demographics and injury status.
+* **`Force_Types` (Lookup):** A standardized dictionary linked via `force_id` to ensure data consistency.
 
 
-
-### 1. The Parent-Child Structure
-* **`Incidents` (Parent Table):** This is the central anchor of the database. It stores the unique "Event" data (Date, Location, City).
-* **`Officers` & `Victims` (Child Tables):** These contain the detailed personnel data. They are linked back to the `Incidents` table via the `incident_id` Foreign Key.
-
-### 2. One-to-Many Relationships
-I designed the schema to handle **One-to-Many** relationships rather than simple One-to-One matches:
-* **One Incident $\rightarrow$ Many Officers:** A single incident often involves multiple responding officers. By separating these into two tables, the database can record unique disciplinary outcomes for *each* officer involved in the same event without duplicating the incident data.
-* **One Incident $\rightarrow$ Many Victims:** Similarly, this structure allows multiple subjects to be associated with a single event ID, preserving the integrity of the event data.
-
-### 3. Lookup Tables (Standardization)
-* **`Force_Types`:** To prevent data inconsistency (e.g., "Taser" vs. "Tased"), I implemented a Lookup Table linked via `force_id`. This ensures every incident references a standardized definition of force.
 
 ## Technical Skills Demonstrated
 
-### Advanced SQL Querying
-The `src/police_violence_schema.sql` script demonstrates the ability to leverage these relationships for analysis:
+### 1. Database Implementation (DDL)
+* **Schema Definition:** Created tables with strict data types, **Primary Keys**, and **Foreign Keys** to enforce referential integrity.
+* **Optimization:** Created **Indexes** to speed up queries on frequently searched columns (e.g., City, Date).
+* **Automation:** Implemented **Triggers** to automatically update records based on procedural events.
+* **Lookup Tables:** Designed a reference table for Force Types to normalize categorical data.
 
-* **Multi-Table Joins:** utilized `INNER JOIN` and `LEFT JOIN` commands to reconnect the `Incidents`, `Victims`, and `Officers` tables. This allows for queries that span across relationships (e.g., *"Find the City (from Incidents) where the Officer (from Officers) had no disciplinary action"*).
-* **Subqueries & Aggregation:** Wrote nested queries to calculate baseline averages across the entire dataset, then compared specific demographic subsets against those baselines.
-* **Complex Filtering:** Applied `GROUP BY` and `HAVING` clauses to identify high-density clusters (e.g., cities with above-average incident rates).
+### 2. Advanced SQL Analysis
+The project utilizes advanced SQL features to derive insights:
 
-### Data Integrity
-* **Constraints:** Implemented **Primary Keys** to ensure every record is unique and **Foreign Keys** to enforce referential integrity (preventing an officer from being added to a non-existent incident).
+* **Window Functions:** Used `OVER(PARTITION BY)` and `AVG() OVER()` to calculate race-specific incident counts and compare them against the **average across all races** in a single query.
+* **Ranking:** Implemented `DENSE_RANK()` to order racial groups by incident frequency while accounting for ties.
+* **Views:** Created the `oc_incidents` View to permanently isolate Orange County data for suburban profile analysis.
+* **CTEs (Common Table Expressions):** Used `WITH` clauses to simplify complex aggregation logic, such as listing officers alongside their total incident counts.
+* **Pivoting Data:** Used `CASE WHEN` logic to pivot the incidents table by year, allowing for side-by-side comparison of 2023 vs. 2024 counts per county.
+* **Set Operations:** Used `UNION` to combine distinct lists of Officers and Victims into a single "Person Status" roster.
 
-## How to Run
-This project is built for **PostgreSQL**.
+## Key Analysis Examples
 
-1.  **Build the Schema:** Run the `CREATE TABLE` commands in `src/police_violence_schema.sql` to set up the relationships.
-2.  **Load Data:** Import the `force_lookup_data.csv` to populate the lookup table.
-3.  **Run Analysis:** Execute the query block at the bottom of the SQL file to generate reports.
+### Investigating Accountability
+I utilized conditional logic to identify "Accountability Gaps"—specifically, incidents where severe harm occurred but no discipline followed.
+```sql
+-- Q10: Among victims where injury status is severe or fatal, how many officers did NOT receive disciplinary action?
+SELECT COUNT(officer_id) AS officer_count
+FROM victims_injury_status
+WHERE disciplinary_action = 'No';
