@@ -1,40 +1,41 @@
-# Incident Reporting Database System (SQL)
+# Incident Reporting Database (SQL)
 
-![Status](https://img.shields.io/badge/Status-Completed-success)
 ![Language](https://img.shields.io/badge/Language-SQL-blue)
-![Focus](https://img.shields.io/badge/Focus-Data%20Engineering%20%7C%20Database%20Design-blue)
+![Database](https://img.shields.io/badge/Database-PostgreSQL-blue)
+![Focus](https://img.shields.io/badge/Focus-Data%20Modeling-orange)
 
-## 📌 Technical Overview
-This repository contains the schema design, data modeling, and analytical queries for a relational database built to structure complex incident reporting data.
+## Project Overview
+This project establishes a relational database to structure and analyze incident reporting data from Los Angeles and Orange County. The goal was to take raw, unstructured incident logs and convert them into a clean, normalized schema that supports complex querying.
 
-The project demonstrates **end-to-end data engineering capabilities**, transforming unstructured incident logs from Los Angeles and Orange County into a normalized relational architecture. The system is optimized for multi-dimensional analysis, handling many-to-one relationships between incidents, personnel, and subject demographics.
+The database handles one-to-many relationships (e.g., multiple officers per incident) and enforces data integrity through strict primary and foreign key constraints.
 
-## 🛠️ Engineering Capabilities
-* **Relational Schema Design:** Designed a **normalized Star-like Schema** to reduce data redundancy and ensure referential integrity between Fact tables (Incidents) and Dimension tables (Officers, Victims, Force Types).
-* **Advanced SQL Querying:**
-    * **Complex Joins:** Implemented multi-table joins to reconstruct event narratives from fragmented dimensional data.
-    * **Subqueries & Aggregations:** Utilized nested subqueries to calculate baseline averages (e.g., county-wide incident rates) and compare them against specific subset metrics.
-    * **Conditional Logic:** Developed queries with complex `WHERE` and `HAVING` clauses to filter for specific multi-variable edge cases (e.g., specific injury outcomes linked to lack of procedural action).
-* **Data Integrity:** Enforced database constraints using Primary Keys and Foreign Keys to prevent orphan records and ensure data quality.
+## Technical Implementation
 
-## 📂 Database Architecture
-The database models the following entity relationships:
+### 1. Database Schema
+I designed a **Star-Schema** architecture to separate the central event data from the descriptive attributes. This reduces redundancy and improves query performance.
 
-* **`Incidents` (Fact Table):** The central node containing temporal and geospatial data (Date, City, Coordinates).
-* **`Victims` (Dimension):** Stores demographic and health outcome data, linked via Foreign Key.
-* **`Officers` (Dimension):** Stores personnel metadata and procedural outcomes (Disciplinary Action), allowing for one-to-many analysis (multiple officers per incident).
-* **`Force_Types` (Lookup):** A standardized dictionary table to normalize force categorization.
+* **`Incidents` (Fact Table):** Central table containing the "when" and "where" (Date, Location, City).
+* **`Victims` & `Officers` (Dimension Tables):** Stores demographic and personnel data. Linked to Incidents via Foreign Keys.
+* **`Force_Types` (Lookup Table):** A standardized dictionary for force categories (e.g., Taser, Control Hold) to ensure data consistency.
 
-### Schema Diagram
-[View Entity Relationship Diagram (EER)](diagrams/entity_relationship_diagram.pdf)
+### 2. SQL Logic
+The `src/police_violence_schema.sql` script handles the full ETL (Extract, Transform, Load) process:
 
-## 💻 Sample Query Logic
-The `src/police_violence_schema.sql` script includes queries that demonstrate:
+* **Table Creation:** Defines tables with specific data types and constraints to prevent bad data entry (e.g., orphan records).
+* **Complex Joins:** Connects four distinct tables to reconstruct complete incident narratives from fragmented data.
+* **Analytical Queries:**
+    * **Subqueries:** Calculates baseline averages (e.g., average incidents across all demographics) to compare against specific groups.
+    * **Aggregations:** Groups data by multiple dimensions (City + Injury Status) to find high-density clusters.
+    * **Filtering:** Uses `HAVING` clauses to filter grouped data based on aggregate thresholds.
 
-1.  **Demographic Aggregation:** Grouping data by multiple dimensions (Race/Ethnicity + Injury Status) to derive frequency distributions.
-2.  **Comparative Analytics:** Comparing the *average* number of incidents across all cohorts vs. the *actual* count for specific high-frequency groups.
-3.  **Cross-Table filtering:** Isolating records that meet criteria across joined tables (e.g., Incidents in 'City X' AND Officer Disciplinary Status = 'NULL' AND Victim Status = 'Severe').
+[Image of Database Schema Diagram]
 
+## How to Run
+This project is built for **PostgreSQL**.
+
+1.  **Build the Schema:** Run the `CREATE TABLE` commands in `src/police_violence_schema.sql`.
+2.  **Load Data:** Import the `force_lookup_data.csv` to populate the lookup table.
+3.  **Run Queries:** Execute the analysis scripts at the bottom of the SQL file to generate reports.
 ## 🚀 Usage
 This project uses **PostgreSQL** syntax.
 1.  **Schema Build:** Run the `CREATE TABLE` statements in `src/` to initialize the architecture.
