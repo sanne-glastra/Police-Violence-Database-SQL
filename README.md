@@ -47,7 +47,7 @@ The project utilizes advanced SQL features to derive insights:
 ## Key Analysis Examples
 
 ### Investigating Accountability
-I utilized conditional logic to identify "Accountability Gaps"—specifically, incidents where severe harm occurred but no discipline followed.
+I used CASE WHEN logic inside aggregation functions to "pivot" the data, transforming rows (dates) into columns (years) for side-by-side temporal analysis.
 ```sql
 -- Q4: Pivot incident counts by year to compare 2023 vs 2024 per county
 SELECT county, 
